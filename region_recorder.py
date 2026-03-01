@@ -17,7 +17,6 @@ FFMPEG_BIN = "ffmpeg"
 SELECTOR_SCRIPT = BASE_DIR / "select_region.py"
 POST_SAVE_SCRIPT = BASE_DIR / "post_save_dialog.py"
 OVERLAY_SCRIPT = BASE_DIR / "recording_overlay.py"
-DRAW_SCRIPT = BASE_DIR / "draw_overlay.py"
 LOG_FILE = BASE_DIR / "recorder.log"
 AUDIO_KEYWORDS = [
     "virtual-audio-capturer",
@@ -37,7 +36,6 @@ WM_HOTKEY = 0x0312
 ID_TOGGLE = 1
 ID_RESELECT = 2
 ID_QUIT = 3
-ID_DRAW = 4
 SINGLETON_NAME = "Global\\ScreenRegionRecorderSingleton"
 
 DEFAULT_CONFIG = {
@@ -45,7 +43,6 @@ DEFAULT_CONFIG = {
         "toggle": "ctrl+x",
         "reselect": "ctrl+shift+r",
         "quit": "ctrl+shift+q",
-        "draw": "ctrl+shift+d",
     },
     "recording": {
         "fps": 30,
@@ -141,7 +138,6 @@ class Recorder:
         self.audio_device = None
         self.ffmpeg_log = None
         self.overlay_proc = None
-        self.draw_proc = None
         self.last_hotkey_time = {}
         self.record_started_at = 0.0
         self.current_output_path = None
@@ -310,55 +306,6 @@ class Recorder:
                 pass
         self.overlay_proc = None
 
-    def _toggle_draw_overlay(self):
-        """Toggle drawing overlay on/off during recording."""
-        if self.proc is None:
-            self._notify("Start recording before drawing")
-            return
-        if self.draw_proc is not None and self.draw_proc.poll() is None:
-            # Close existing draw overlay
-            try:
-                self.draw_proc.terminate()
-                self.draw_proc.wait(timeout=1.5)
-            except Exception:
-                try:
-                    self.draw_proc.kill()
-                except Exception:
-                    pass
-            self.draw_proc = None
-            self._notify("Drawing overlay closed")
-            return
-
-        if not DRAW_SCRIPT.exists():
-            self._notify("draw_overlay.py not found")
-            return
-
-        creation_flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
-        try:
-            self.draw_proc = subprocess.Popen(
-                [sys.executable, str(DRAW_SCRIPT)],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                creationflags=creation_flags,
-            )
-            self._notify("Drawing overlay opened. F=Freehand, A=Arrow, R=Rect, C=Clear, Esc=Close")
-        except Exception as ex:
-            self.draw_proc = None
-            self._notify(f"Failed to open drawing overlay: {ex}")
-
-    def _stop_draw_overlay(self):
-        if self.draw_proc is None:
-            return
-        try:
-            self.draw_proc.terminate()
-            self.draw_proc.wait(timeout=1.5)
-        except Exception:
-            try:
-                self.draw_proc.kill()
-            except Exception:
-                pass
-        self.draw_proc = None
-
     def start_recording(self):
         with self.lock:
             if self.proc is not None:
@@ -410,7 +357,6 @@ class Recorder:
         with self.lock:
             if self.proc is None:
                 return
-            self._stop_draw_overlay()
             try:
                 if self.proc.stdin:
                     self.proc.stdin.write(b"q\n")
@@ -427,6 +373,7 @@ class Recorder:
                     self.proc.kill()
             self.proc = None
             self.record_started_at = 0.0
+            self.region = None  # Always re-select area on next cycle
             self._stop_overlay()
             if self.ffmpeg_log:
                 self.ffmpeg_log.write("----- ffmpeg stop -----\n")
@@ -540,7 +487,7 @@ class Recorder:
         # Parse hotkeys from config
         hotkey_defs = {}
         for name, hk_id in [("toggle", ID_TOGGLE), ("reselect", ID_RESELECT),
-                             ("quit", ID_QUIT), ("draw", ID_DRAW)]:
+                             ("quit", ID_QUIT)]:
             try:
                 mods, vk = parse_hotkey(hotkeys_cfg[name])
                 hotkey_defs[hk_id] = (mods, vk, hotkeys_cfg[name])
@@ -569,7 +516,6 @@ class Recorder:
             f"Background mode enabled. "
             f"{hotkey_texts[ID_TOGGLE]} cycle: region -> start -> stop, "
             f"{hotkey_texts[ID_RESELECT]} new region, "
-            f"{hotkey_texts[ID_DRAW]} draw, "
             f"{hotkey_texts[ID_QUIT]} quit"
         )
 
@@ -587,16 +533,12 @@ class Recorder:
                         self.toggle()
                     elif hotkey_id == ID_RESELECT:
                         self.reselect_region()
-                    elif hotkey_id == ID_DRAW:
-                        self._toggle_draw_overlay()
                     elif hotkey_id == ID_QUIT:
                         self.stop_recording()
                         self._stop_overlay()
-                        self._stop_draw_overlay()
                         break
         finally:
             self._stop_overlay()
-            self._stop_draw_overlay()
             for hk_id in registered:
                 user32.UnregisterHotKey(None, hk_id)
 

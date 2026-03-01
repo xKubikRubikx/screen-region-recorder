@@ -77,6 +77,20 @@ def main():
     if target:
         target_path = str(Path(target).resolve())
     else:
+        # User cancelled — ask if they want to discard
+        discard = messagebox.askyesno(
+            "Discard recording?",
+            "No save location selected. Delete this recording?",
+            parent=root,
+        )
+        if discard:
+            try:
+                src.unlink(missing_ok=True)
+            except Exception:
+                pass
+            print(json.dumps({"path": "", "copied": False}), flush=True)
+            root.destroy()
+            return
         target_path = str(src)
 
     copied = False

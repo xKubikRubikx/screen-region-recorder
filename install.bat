@@ -7,7 +7,7 @@ if "%SRC_DIR:~-1%"=="\" set "SRC_DIR=%SRC_DIR:~0,-1%"
 set "APP_DIR=%LOCALAPPDATA%\ScreenRegionRecorder"
 if not exist "%APP_DIR%" mkdir "%APP_DIR%"
 
-for %%F in (region_recorder.py select_region.py post_save_dialog.py recording_overlay.py draw_overlay.py config.json requirements.txt) do (
+for %%F in (region_recorder.py select_region.py post_save_dialog.py recording_overlay.py config.json requirements.txt) do (
   if not exist "%SRC_DIR%\%%F" (
     echo ERROR: %%F was not found next to install.bat
     pause
@@ -24,7 +24,6 @@ copy /Y "%SRC_DIR%\region_recorder.py" "%APP_DIR%\region_recorder.py" >nul
 copy /Y "%SRC_DIR%\select_region.py" "%APP_DIR%\select_region.py" >nul
 copy /Y "%SRC_DIR%\post_save_dialog.py" "%APP_DIR%\post_save_dialog.py" >nul
 copy /Y "%SRC_DIR%\recording_overlay.py" "%APP_DIR%\recording_overlay.py" >nul
-copy /Y "%SRC_DIR%\draw_overlay.py" "%APP_DIR%\draw_overlay.py" >nul
 copy /Y "%SRC_DIR%\requirements.txt" "%APP_DIR%\requirements.txt" >nul
 if not exist "%APP_DIR%\config.json" copy /Y "%SRC_DIR%\config.json" "%APP_DIR%\config.json" >nul
 
@@ -98,7 +97,6 @@ echo Installed to: %APP_DIR%
 echo Hotkeys (customizable in config.json):
 echo   Ctrl+X       - cycle: region - start - stop
 echo   Ctrl+Shift+R - force reselect region
-echo   Ctrl+Shift+D - toggle drawing overlay
 echo   Ctrl+Shift+Q - exit app
 pause
 endlocal
