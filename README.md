@@ -15,9 +15,12 @@
 
 - **Region selection** — draw a rectangle on your screen to define the capture area
 - **MP4 recording** — records directly to MP4 using FFmpeg (H.264 + AAC)
+- **High quality** — CRF 18 by default (near-lossless, sharp text & UI)
 - **System audio capture** — automatically detects Stereo Mix / Virtual Audio Cable
+- **Drawing overlay** — draw arrows, rectangles, and freehand annotations during recording
 - **Recording indicator** — subtle pulsing red border around the screen while recording (invisible to capture)
 - **Save As dialog** — after stopping, pick where to save + copy file/path to clipboard
+- **Customizable hotkeys** — change any shortcut via `config.json`
 - **Background operation** — no window, no tray icon, just hotkeys
 - **Auto-start with Windows** — configures itself via the Registry on install
 - **One-click install/uninstall** — batch scripts handle everything
@@ -26,9 +29,12 @@
 
 ## ⌨️ Hotkeys
 
+All hotkeys are customizable in `config.json`.
+
 | Shortcut | Action |
 |---|---|
 | `Ctrl+X` | **Cycle**: Select region → Start recording → Stop recording |
+| `Ctrl+Shift+D` | Toggle drawing overlay (arrows, shapes, freehand) |
 | `Ctrl+Shift+R` | Re-select capture region |
 | `Ctrl+Shift+Q` | Quit the application |
 
@@ -39,6 +45,19 @@
 3. **3rd press** → recording stops → Save As dialog → option to copy file to clipboard  
 
 After saving, the cycle resets — press `Ctrl+X` again to start a new recording with the same region, or `Ctrl+Shift+R` to pick a new one.
+
+### Drawing Overlay
+
+During recording, press `Ctrl+Shift+D` to open the drawing overlay:
+
+| Key | Action |
+|---|---|
+| `F` | Freehand drawing |
+| `A` | Arrow tool |
+| `R` | Rectangle tool |
+| `C` | Clear all drawings |
+| `1-5` | Change color (red, green, blue, yellow, white) |
+| `Esc` | Close overlay |
 
 ---
 
@@ -72,28 +91,46 @@ Run `uninstall.bat` — it will:
 
 ---
 
+## ⚙️ Configuration
+
+Edit `config.json` to customize hotkeys and recording quality:
+
+```json
+{
+  "hotkeys": {
+    "toggle": "ctrl+x",
+    "reselect": "ctrl+shift+r",
+    "quit": "ctrl+shift+q",
+    "draw": "ctrl+shift+d"
+  },
+  "recording": {
+    "fps": 30,
+    "crf": 18,
+    "preset": "veryfast"
+  }
+}
+```
+
+**Recording quality:**
+- `crf` — quality level (0 = lossless, 18 = high quality, 23 = default, 28 = low). Lower = better quality, bigger file.
+- `preset` — encoding speed (`ultrafast`, `superfast`, `veryfast`, `faster`, `fast`, `medium`). Faster = less CPU, slightly bigger file.
+- `fps` — frames per second (15, 30, 60)
+
+---
+
 ## 🏗️ Project Structure
 
 ```
 ├── region_recorder.py      # Main app — hotkey listener, FFmpeg process manager
 ├── select_region.py        # Fullscreen overlay for drawing the capture rectangle
 ├── recording_overlay.py    # Animated red border shown during recording
+├── draw_overlay.py         # Drawing annotations overlay (freehand, arrows, rects)
 ├── post_save_dialog.py     # Save As dialog + clipboard copy utility
+├── config.json             # User-configurable hotkeys and quality settings
 ├── requirements.txt        # Python dependencies (none required)
 ├── install.bat             # One-click installer
 └── uninstall.bat           # One-click uninstaller
 ```
-
----
-
-## ⚙️ Technical Details
-
-- **Video**: FFmpeg `gdigrab` input → `libx264` (veryfast preset) → MP4
-- **Audio**: DirectShow loopback via Stereo Mix / Virtual Audio Cable (optional, auto-detected)
-- **FPS**: 30 fps by default (configurable in `region_recorder.py`)
-- **Overlay**: Uses `SetWindowDisplayAffinity(WDA_EXCLUDEFROMCAPTURE)` so the recording border is invisible in the output
-- **Singleton**: WinAPI mutex prevents multiple instances
-- **No external Python packages** — uses only `tkinter` (bundled with Python) and `ctypes`
 
 ---
 

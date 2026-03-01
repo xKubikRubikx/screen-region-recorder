@@ -1,0 +1,13 @@
+{
+  "hotkeys": {
+    "toggle": "ctrl+x",
+    "reselect": "ctrl+shift+r",
+    "quit": "ctrl+shift+q",
+    "draw": "ctrl+shift+d"
+  },
+  "recording": {
+    "fps": 30,
+    "crf": 18,
+    "preset": "veryfast"
+  }
+}
