@@ -2,8 +2,7 @@
   "hotkeys": {
     "toggle": "ctrl+x",
     "reselect": "ctrl+shift+r",
-    "quit": "ctrl+shift+q",
-    "draw": "ctrl+shift+d"
+    "quit": "ctrl+shift+q"
   },
   "recording": {
     "fps": 30,
