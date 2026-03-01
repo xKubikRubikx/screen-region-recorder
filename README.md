@@ -1,12 +1,13 @@
 # 🎬 Screen Region Recorder
 
-> Lightweight, zero-bloat screen region recorder for Windows.  
-> Select any area → record to MP4 → save anywhere. All from the background.
+> **Screenshot, but for video.** Select any screen area → record to MP4 → save or share. One hotkey, zero bloat.
 
 ![Windows](https://img.shields.io/badge/platform-Windows%2010%2F11-blue?logo=windows)
 ![Python](https://img.shields.io/badge/python-3.11+-yellow?logo=python)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![FFmpeg](https://img.shields.io/badge/powered%20by-FFmpeg-orange?logo=ffmpeg)
+
+⭐ **If you find this useful, please star the repo — it helps others discover it!**
 
 ---
 
@@ -43,16 +44,17 @@ After saving, the cycle resets — press `Ctrl+X` again to start a new recording
 
 ## 📦 Installation
 
+### Quick Start
+
+1. **[Download the latest release](https://github.com/xKubikRubikx/screen-region-recorder/releases/latest)** (.zip)
+2. Extract anywhere
+3. Run `install.bat`
+4. Done! The recorder is now running in the background 🎉
+
 ### Prerequisites
 - **Windows 10/11**
 - **Python 3.11+** (auto-installed via `winget` if missing)
 - **FFmpeg** (auto-installed via `winget` if missing)
-
-### Install
-
-1. Download or clone this repository
-2. Run `install.bat` as your regular user (no admin needed)
-3. Done! The recorder is now running in the background
 
 The installer will:
 - Copy files to `%LOCALAPPDATA%\ScreenRegionRecorder`
@@ -97,7 +99,7 @@ Run `uninstall.bat` — it will:
 
 ## 🤝 Contributing
 
-Feel free to open issues or submit pull requests.
+Feel free to open issues, suggest features, or submit pull requests.
 
 ---
 
